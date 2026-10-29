@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CodeBench – learn every kind of coding</title>
+<style>
+:root{--onb:#fff;--m1:#ffd6e8;--m2:#c9dcff;--m3:#d4f5e6;--m4:#fff0c2;--paper:#f4f1fb;--card:#fff;--ink:#17233b;--mute:#5b6a82;--line:#cdd7e4;--blue:#2f5bea;--sun:#ffd84d;--ok:#1f8a4c;--bad:#c23b3b;--code:#f6f8fb}
+@media (prefers-color-scheme:dark){:root{--onb:#10182b;--m1:#4a2a5e;--m2:#1f3a7a;--m3:#14504a;--m4:#5a3f1a;--paper:#121a2b;--card:#1a2439;--ink:#e8eefb;--mute:#93a3bf;--line:#2c3a57;--blue:#7b9bff;--sun:#ffd84d;--ok:#4cc27f;--bad:#ff7b7b;--code:#101828}}
+*{box-sizing:border-box}
+body{margin:0;font:16px/1.55 "Segoe UI",system-ui,sans-serif;background:var(--paper);color:var(--ink);background-image:radial-gradient(circle at 12% 18%,var(--m1) 0,transparent 42%),radial-gradient(circle at 88% 12%,var(--m2) 0,transparent 44%),radial-gradient(circle at 75% 88%,var(--m3) 0,transparent 42%),radial-gradient(circle at 8% 92%,var(--m4) 0,transparent 40%);background-attachment:fixed}
+.app{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+aside{background:var(--card);border-right:1px solid var(--line);padding:20px 14px;position:sticky;top:0;height:100vh;overflow:auto}
+h1{font:700 22px Georgia,serif;margin:0 6px 4px}
+.sub{color:var(--mute);font-size:13px;margin:0 6px 18px}
+.track{display:block;width:100%;text-align:left;background:none;border:0;border-radius:8px;padding:9px 10px;color:var(--ink);font:inherit;cursor:pointer}
+.track:hover{background:var(--paper)}
+.track.on{background:var(--blue);color:var(--onb)}
+.track small{display:block;opacity:.75;font-size:12px}
+.bar{height:4px;background:var(--line);border-radius:2px;margin-top:5px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--sun)}
+main{padding:28px;max-width:900px;width:100%}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.tab{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:6px 12px;border-radius:20px;font:inherit;font-size:14px;cursor:pointer}
+.tab.on{border-color:var(--blue);box-shadow:inset 0 0 0 1px var(--blue)}
+.tab.done::after{content:" ✓";color:var(--ok)}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:16px}
+h2{font:700 26px Georgia,serif;margin:0 0 8px}
+h3{margin:0 0 8px;font-size:16px}
+p{margin:0 0 10px;max-width:70ch}
+textarea{width:100%;min-height:170px;font:14px/1.5 ui-monospace,Consolas,monospace;background:var(--code);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:12px;resize:vertical;tab-size:2}
+button.run,button.main{background:var(--blue);color:var(--onb);border:0;border-radius:8px;padding:9px 16px;font:600 14px "Segoe UI",system-ui,sans-serif;cursor:pointer}
+button.run{background:var(--sun);color:#17233b}
+button:focus-visible,textarea:focus-visible,.track:focus-visible,.tab:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.row{display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap}
+pre.out{background:var(--code);border:1px solid var(--line);border-radius:8px;padding:12px;min-height:50px;margin:10px 0 0;white-space:pre-wrap;font:14px ui-monospace,Consolas,monospace}
+iframe{width:100%;height:220px;border:1px solid var(--line);border-radius:8px;background:#fff;margin-top:10px}
+.opt{display:block;width:100%;text-align:left;margin:6px 0;padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font:inherit;cursor:pointer}
+.opt.right{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 15%,transparent)}
+.opt.wrong{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 15%,transparent)}
+.hint{color:var(--mute);font-size:14px}
+code{background:var(--code);padding:1px 6px;border-radius:4px;font-family:ui-monospace,Consolas,monospace;font-size:14px}
+.stats{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:0 4px 16px;font-size:14px}
+.xpbar{height:8px;background:var(--line);border-radius:4px;margin:6px 0;overflow:hidden}.xpbar i{display:block;height:100%;background:var(--blue)}
+.mission{background:color-mix(in srgb,var(--sun) 30%,var(--card));border:1px dashed var(--ink);border-radius:12px;padding:14px 16px;margin-bottom:16px}
+.pop{position:fixed;left:50%;top:16%;transform:translateX(-50%);background:var(--ink);color:var(--card);padding:12px 22px;border-radius:30px;font-weight:700;z-index:9}
+.cf{position:fixed;top:-14px;width:10px;height:14px;z-index:8;pointer-events:none;animation:fall 1.8s ease-in forwards}
+@keyframes fall{to{transform:translateY(105vh) rotate(720deg)}}
+aside{scrollbar-width:thin}
+aside,.panel{background:color-mix(in srgb,var(--card) 70%,transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}.track.on{box-shadow:0 6px 16px rgba(47,91,234,.35)}.panel{border-radius:16px}
+@keyframes rise{from{opacity:0;transform:translateY(12px)}}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+@keyframes bounce{50%{transform:scale(1.03)}}
+@keyframes pop{from{opacity:0;transform:translate(-50%,-14px) scale(.8)}}
+@media(prefers-reduced-motion:no-preference){
+html{scroll-behavior:smooth}
+body,aside{transition:background-color .4s,color .4s}.th{transition:transform .15s}.th:hover{transform:scale(1.12)}
+.track,.tab,.opt,button.run,button.main,.panel,.xpbar i{transition:background .2s,transform .15s,box-shadow .25s,border-color .2s,width .5s}
+.track:hover{transform:translateX(3px)}
+.tab:hover,.opt:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(23,35,59,.12)}
+button.run:hover,button.main:hover{transform:translateY(-2px);box-shadow:0 6px 14px rgba(23,35,59,.2)}
+button:active{transform:scale(.96)}
+.panel{box-shadow:0 1px 2px rgba(23,35,59,.06)}
+.panel:hover{box-shadow:0 8px 24px rgba(23,35,59,.1)}
+.in>*{animation:rise .45s cubic-bezier(.2,.8,.2,1) both}
+.in>*:nth-child(2){animation-delay:.05s}.in>*:nth-child(3){animation-delay:.1s}.in>*:nth-child(4){animation-delay:.15s}.in>*:nth-child(5){animation-delay:.2s}
+.opt.wrong{animation:shake .35s}.opt.right{animation:bounce .4s}
+.pop{animation:pop .35s cubic-bezier(.2,1.4,.4,1)}
+iframe,pre.out{animation:rise .3s both}}
+pre.tap{background:var(--code);border:1px solid var(--line);border-radius:8px;padding:12px;margin:0 0 10px;overflow:auto;font:14px/1.9 ui-monospace,Consolas,monospace;white-space:pre-wrap}
+.tk{background:none;border:0;border-bottom:2px dotted var(--blue);color:inherit;font:inherit;padding:0 1px;cursor:pointer;border-radius:3px}
+.tk:hover,.tk.sel{background:var(--sun);color:#17233b}
+#exp{margin:0}
+#board{display:grid;grid-template-columns:repeat(6,48px);gap:4px;margin-bottom:12px;width:max-content;max-width:100%}
+.gc{width:48px;height:48px;display:grid;place-items:center;font-size:26px;border-radius:10px;background:color-mix(in srgb,var(--card) 80%,var(--blue) 12%);border:1px solid var(--line)}
+.gc.wl{background:var(--line)}
+.gq{width:100%;padding:10px 12px;margin:6px 0 12px;font:inherit;border:1px solid var(--line);border-radius:8px;background:var(--code);color:var(--ink)}.badges{margin-top:6px;font-size:20px}
+:root[data-theme="pastel"]{color-scheme:light;--onb:#fff;--m1:#ffd6e8;--m2:#c9dcff;--m3:#d4f5e6;--m4:#fff0c2;--paper:#f4f1fb;--card:#fff;--ink:#17233b;--mute:#5b6a82;--line:#cdd7e4;--blue:#2f5bea;--sun:#ffd84d;--ok:#1f8a4c;--bad:#c23b3b;--code:#f6f8fb}
+:root[data-theme="midnight"]{color-scheme:dark;--onb:#10182b;--m1:#4a2a5e;--m2:#1f3a7a;--m3:#14504a;--m4:#5a3f1a;--paper:#121a2b;--card:#1a2439;--ink:#e8eefb;--mute:#93a3bf;--line:#2c3a57;--blue:#7b9bff;--sun:#ffd84d;--ok:#4cc27f;--bad:#ff7b7b;--code:#101828}
+:root[data-theme="sunset"]{color-scheme:light;--onb:#fff;--m1:#ffd1b3;--m2:#ffb3c7;--m3:#ffe6a8;--m4:#e9c6ff;--paper:#fff4ec;--card:#fff;--ink:#3a1f2b;--mute:#7d5a68;--line:#f0cfc0;--blue:#d6366a;--sun:#ffc857;--ok:#1f8a4c;--bad:#c23b3b;--code:#fff8f3}
+:root[data-theme="ocean"]{color-scheme:dark;--onb:#0b1a26;--m1:#0f4c5c;--m2:#1b3a6b;--m3:#134e4a;--m4:#2a2f6b;--paper:#0b1a26;--card:#12283a;--ink:#e6f4fa;--mute:#8fb0c4;--line:#24445a;--blue:#5cc8ff;--sun:#ffe066;--ok:#4cc27f;--bad:#ff8a8a;--code:#0e2030}
+.themes{display:flex;gap:6px;margin:12px 4px 0;flex-wrap:wrap}
+.th{width:36px;height:36px;border-radius:50%;border:2px solid var(--line);background:var(--card);cursor:pointer;font-size:17px;padding:0}
+.th.on{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue)}
+.th:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.mascot{display:flex;gap:16px;align-items:center}.bit{font-size:64px}
+.path{display:flex;flex-wrap:wrap;gap:14px 18px;align-items:flex-start;padding:8px 0}
+.node{background:none;border:0;display:flex;flex-direction:column;align-items:center;width:84px;cursor:pointer;color:var(--ink);font:inherit;padding:0}
+.node span{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:18px;background:var(--card);border:3px solid var(--line)}
+.node.dn span{background:var(--sun);border-color:var(--sun);color:#17233b}
+.node.cur span{border-color:var(--blue);box-shadow:0 0 0 4px color-mix(in srgb,var(--blue) 30%,transparent)}
+.node small{font-size:11px;color:var(--mute);margin-top:4px;text-align:center;line-height:1.2;max-width:84px}
+.node:focus-visible{outline:3px solid var(--blue);outline-offset:2px;border-radius:10px}
+@keyframes bob{50%{transform:translateY(-6px)}}@keyframes pulse{50%{box-shadow:0 0 0 10px transparent}}
+@media(prefers-reduced-motion:no-preference){.bit{animation:bob 2s ease-in-out infinite}.node.cur span{animation:pulse 1.6s infinite}.node span{transition:transform .15s}.node:hover span{transform:scale(1.12)}}
+.bline{display:block;width:100%;text-align:left;font:14px ui-monospace,Consolas,monospace;background:var(--code);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin:4px 0;cursor:pointer;white-space:pre;overflow:auto}
+.bline:hover{border-color:var(--blue)}.bline.good{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 18%,var(--code))}.bline.bad{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 16%,var(--code))}
+.bline:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+@media(prefers-reduced-motion:no-preference){.bline.bad{animation:shake .35s}}
+@media(max-width:760px){.app{grid-template-columns:1fr}aside{position:static;height:auto}main{padding:16px}}
+@media(prefers-reduced-motion:no-preference){.bar i{transition:width .4s}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside>
+  <h1>CodeBench</h1>
+  <p class="sub">Learn by playing. Tiny lessons, big wins.</p>
+  <div class="stats" id="stats"></div>
+  <nav id="tracks" aria-label="Languages"></nav>
+  <div class="themes" id="themes" role="group" aria-label="Choose a theme"></div>
+  <button class="main" id="mt" style="background:var(--mute);margin:12px 4px 0;font-size:13px"></button>
+  <button class="main" id="au" style="background:var(--mute);margin:8px 4px 0;font-size:13px"></button>
+  <button class="main" id="rp" style="background:var(--mute);margin:8px 4px 0;font-size:13px">Reset progress</button>
+</aside>
+<main id="main"></main>
+</div>
+<script>
+const T=[
+{id:"map",name:"🗺️ Quest Map",tag:"Your adventure starts here",map:1,gloss:1,L:[{t:"Quest Map"}]},
+{id:"start",name:"⭐ JavaScript",tag:"Beginner path: start here",run:"js",L:[
+{t:"1. Say hello",b:"<code>console.log</code> prints a message. The text goes inside quotes, and every line ends with a semicolon.",c:"console.log('Hello');",ch:{k:"Make it print exactly: Hello, World!",e:"Hello, World!",h:"Change the text inside the quotes."},q:["What does console.log do?",["Prints a message","Deletes a file","Makes a loop"],0]},
+{t:"2. Variables",b:"A variable is a labeled box that holds a value. <code>let</code> makes a box you can change later.",c:"let score = 5;\nconsole.log(score);",ch:{k:"Make it print 10.",e:"10",h:"Change the number in the box."},q:["Which keyword makes a changeable variable?",["const","let","print"],1]},
+{t:"3. Math",b:"JavaScript is a calculator: <code>+</code> add, <code>-</code> subtract, <code>*</code> multiply, <code>/</code> divide.",c:"console.log(2 + 3);",ch:{k:"Print the answer to 6 times 7.",e:"42",h:"Use * for times: 6 * 7"},q:["Which symbol multiplies numbers?",["x","*","+"],1]},
+{t:"4. Text",b:"Text is called a string. Use <code>+</code> to glue strings together.",c:"const name = 'Bob';\nconsole.log('Hi ' + name);",ch:{k:"Make it print: Hi Ada",e:"Hi Ada",h:"Change what is inside name."},q:["What does + do with two pieces of text?",["Joins them together","Subtracts them","Deletes them"],0]},
+{t:"5. Decisions",b:"<code>if</code> runs steps only when something is true. <code>else</code> runs when it is not.",c:"const age = 20;\nif (age >= 18) {\n  console.log('Adult');\n} else {\n  console.log('Kid');\n}",ch:{k:"Make it print Kid.",e:"Kid",h:"Change age to a number below 18."},q:["When does the else part run?",["When the if is false","Always","Never"],0]},
+{t:"6. Loops",b:"A loop repeats steps so you don't write them again and again.",c:"for (let i = 1; i <= 3; i++) {\n  console.log(i);\n}",ch:{k:"Print the numbers 1 to 5, one per line.",e:"1\n2\n3\n4\n5",h:"Change the 3 to a 5."},q:["How many times does that loop run?",["2","3","4"],1]},
+{t:"7. Functions",b:"A function is a recipe you can reuse. <code>return</code> hands the answer back.",c:"function double(n) {\n  return n * 2;\n}\nconsole.log(double(4));",ch:{k:"Print double of 21.",e:"42",h:"Change the 4 inside double( )."},q:["What does return do?",["Prints text","Hands back a result","Starts a loop"],1]},
+{t:"8. Lists",b:"An array is a list. <code>push</code> adds to the end and <code>length</code> counts the items.",c:"const fruits = ['apple', 'banana'];\nfruits.push('mango');\nconsole.log(fruits.length);",ch:{k:"Make it print 4.",e:"4",h:"Add one more push line."},q:["What does push do?",["Adds an item to the end","Removes the first item","Sorts it"],0]},
+{t:"9. Mini project: Times table",b:"Time to combine loops and math into a tiny project.",c:"const n = 3;\nfor (let i = 1; i <= 5; i++) {\n  console.log(n + ' x ' + i + ' = ' + n * i);\n}",ch:{k:"Make the 5 times table, from 5 x 1 to 5 x 3 only.",e:"5 x 1 = 5\n5 x 2 = 10\n5 x 3 = 15",h:"Change n to 5 and the loop limit to 3."},q:["Which keyword repeats steps?",["if","for","return"],1]},
+{t:"10. Boss: FizzBuzz",b:"A famous puzzle. <code>%</code> gives the remainder, so <code>i % 3 === 0</code> means i is a multiple of 3.",c:"for (let i = 1; i <= 5; i++) {\n  console.log(i);\n}",ch:{k:"Print Fizz for multiples of 3, Buzz for multiples of 5, else the number.",e:"1\n2\nFizz\n4\nBuzz",h:"Inside the loop: if (i % 3 === 0) print Fizz, else if (i % 5 === 0) print Buzz, else print i."},q:["What does 5 % 2 give?",["1","2","2.5"],0]}]},
+{id:"game",name:"🎮 Robot Game",tag:"Code the robot to the star",game:1,L:[
+{t:"1. First steps",b:"Your robot 🤖 only obeys your code. Type <code>right();</code> to move it one step right, until it reaches the star ⭐.",g:["......","......","S....*","......","......"]},
+{t:"2. Use a loop",b:"Typing <code>down();</code> four times is boring. Use a loop: <code>for (let i = 0; i &lt; 4; i++) { down(); }</code>",g:["S.....","......","......","......",".....*"]},
+{t:"3. Around the wall",b:"Walls 🧱 stop the robot. Plan a path around them, then code it.",g:["S.#...","..#.#.","..#.#.","....#*","......"]},
+{t:"4. Back and forth",b:"Go right, down, left, then down again. Loops make this short.",g:["S.....","#####.","......",".#####","*....."]},
+{t:"5. Boss maze",b:"A long snake path. Take it one piece at a time, and press Run often.",g:["S.#...","#.#.#.","..#.#.",".##.#.","....#*"]},
+{t:"6. Coin collector",b:"Collect the 🪙 coins on your way to the star. Each coin is +5 XP when you finish.",g:["S.c...","......",".c.c..","......","c....*"]},
+{t:"7. Meet the guard",b:"👾 patrols back and forth, one step each time you move. Use wait() to pause and time your crossing.",g:["S.#...","..#.c.","..E...","..#.#.","....#*"]},
+{t:"8. Coins and guards",b:"Grab the coins without touching the guard.",g:["S.....","c.E..c","......",".##.#.","c...c*"]},
+{t:"9. Two guards",b:"Two guards, two rows. Time each crossing.",g:["S.....","..E...","......","...E..",".....*"]},
+{t:"10. Final boss",b:"Walls, coins and guards all at once. You've got this!",g:["S.#c..","..#E.c","c...#.","#.E.#c","c...c*"]}]},
+{id:"web",name:"HTML & CSS",tag:"Page structure & style",run:"html",L:[
+{t:"Page structure",b:"HTML describes what's on the page. Tags like <code>&lt;h1&gt;</code> and <code>&lt;p&gt;</code> mark headings and paragraphs. Edit it and press Run.",c:"<h1>My first page</h1>\n<p>HTML gives a page its structure.</p>\n<ul>\n  <li>Headings</li>\n  <li>Lists</li>\n</ul>",q:["Which tag makes the biggest heading?",["<p>","<h1>","<ul>"],1]},
+{t:"Styling with CSS",b:"CSS picks elements and changes how they look: color, spacing, layout.",c:"<style>\n  h1 { color: #2f5bea; }\n  .box { padding: 16px; border: 2px solid #ffd84d; border-radius: 10px; }\n</style>\n<div class=\"box\">\n  <h1>Styled!</h1>\n</div>",q:["What does <code>.box</code> select?",["Elements with class=\"box\"","The first div","Every element"],0]},
+{t:"🐛 Bug Hunt 1",bug:{lines:["<h1>Welcome</h1>", "<p>Hello there!<p>", "<ul>", "  <li>One</li>", "</ul>"],bad:1,why:"A paragraph must close with </p>, not another <p>."}},
+{t:"🐛 Bug Hunt 2",bug:{lines:["<style>", "  h1 { color: blue; }", "  p { color red; }", "</style>", "<h1>Hi</h1>"],bad:2,why:"CSS needs a colon: color: red;"}},
+{t:"🐛 Bug Hunt 3",bug:{lines:["<div class=\"box\">", "  <h2>Title</h2>", "  <p>Text</p>", "</dv>", "<!-- end -->"],bad:3,why:"The closing tag should be </div>."}}]},
+{id:"py",name:"Python",tag:"Scripting, data, AI",cmd:"python lesson.py",L:[
+{t:"Variables & printing",b:"Python uses indentation instead of braces and needs no type declarations.",c:"name = \"Ada\"\nage = 36\nprint(f\"{name} is {age}\")",q:["How do you print text in Python?",["echo()","print()","console.log()"],1]},
+{t:"Lists & loops",b:"Lists hold items. A <code>for</code> loop visits each one; list comprehensions build lists in one line.",c:"nums = [1, 2, 3, 4]\nsquares = [n * n for n in nums]\nfor s in squares:\n    print(s)",q:["What does the loop body need?",["Curly braces","Indentation","A semicolon"],1]},
+{t:"🐛 Bug Hunt 1",bug:{lines:["name = 'Ada'", "age = 36", "print(name + age)", "print('done')"],bad:2,why:"You can't add text and a number. Use an f-string or str(age)."}},
+{t:"🐛 Bug Hunt 2",bug:{lines:["for i in range(3):", "print(i)", "print('end')"],bad:1,why:"Python needs the loop body indented."}},
+{t:"🐛 Bug Hunt 3",bug:{lines:["nums = [1, 2, 3]", "total = 0", "for n in nums:", "    total += n", "print(totl)"],bad:4,why:"Typo: the variable is called total."}}]},
+{id:"sql",name:"SQL",tag:"Databases",cmd:"sqlite3 lesson.db < lesson.sql",L:[
+{t:"SELECT & WHERE",b:"SQL asks questions of tables. <code>SELECT</code> picks columns; <code>WHERE</code> filters rows.",c:"CREATE TABLE users (name TEXT, age INT);\nINSERT INTO users VALUES ('Ada', 36), ('Linus', 28);\nSELECT name FROM users WHERE age > 30;",q:["Which clause filters rows?",["WHERE","FROM","ORDER BY"],0]},
+{t:"Joins & grouping",b:"<code>JOIN</code> combines tables on a shared column. <code>GROUP BY</code> summarizes rows, e.g. count per customer.",c:"SELECT c.name, COUNT(o.id) AS orders\nFROM customers c\nJOIN orders o ON o.customer_id = c.id\nGROUP BY c.name;",q:["What does GROUP BY do?",["Sorts rows","Collapses rows into summary groups","Deletes duplicates forever"],1]},
+{t:"🐛 Bug Hunt 1",bug:{lines:["SELECT name", "FORM users", "WHERE age > 30;"],bad:1,why:"FROM is spelled F-R-O-M."}},
+{t:"🐛 Bug Hunt 2",bug:{lines:["INSERT INTO users", "VALUES ('Ada', 36)", "WHERE id = 1;"],bad:2,why:"INSERT doesn't use WHERE. WHERE belongs in SELECT, UPDATE and DELETE."}},
+{t:"🐛 Bug Hunt 3",bug:{lines:["SELECT COUNT(*)", "FROM orders", "GROUP BY customer_id", "HAVING COUNT(*) > 2", "WHERE total > 10;"],bad:4,why:"WHERE must come before GROUP BY, not after HAVING."}}]},
+{id:"java",name:"Java",tag:"Enterprise & Android",cmd:"javac Main.java && java Main",L:[
+{t:"Classes & main",b:"Every Java program lives in a class, and starts at <code>main</code>. Types are declared explicitly.",c:"public class Main {\n  public static void main(String[] args) {\n    int year = 2026;\n    String lang = \"Java\";\n    System.out.println(lang + \" \" + year);\n  }\n}",q:["Where does a Java program start?",["main method","The first line of the file","init()"],0]},
+{t:"🐛 Bug Hunt 1",bug:{lines:["public class Main {", "  public static void main(String[] args) {", "    int x = 5", "    System.out.println(x);", "  }", "}"],bad:2,why:"Java statements end with a semicolon."}},
+{t:"🐛 Bug Hunt 2",bug:{lines:["String name = \"Ada\";", "int age = \"36\";", "System.out.println(name);"],bad:1,why:"int holds numbers, not text in quotes."}},
+{t:"🐛 Bug Hunt 3",bug:{lines:["int[] nums = {1, 2, 3};", "System.out.println(nums.length);", "System.out.println(nums[3]);"],bad:2,why:"Arrays start at 0, so the last index is 2. nums[3] is out of range."}}]},
+{id:"cpp",name:"C++",tag:"Games & systems",cmd:"g++ main.cpp -o main && ./main",L:[
+{t:"Hello, vectors",b:"C++ compiles to fast native code. <code>std::vector</code> is a resizable array.",c:"#include <iostream>\n#include <vector>\nint main() {\n  std::vector<int> v = {1, 2, 3};\n  v.push_back(4);\n  for (int n : v) std::cout << n << \"\\n\";\n}",q:["What does <code>push_back</code> do?",["Removes the last item","Adds an item to the end","Sorts the vector"],1]},
+{t:"🐛 Bug Hunt 1",bug:{lines:["#include <iostream>", "int main() {", "  std::cout << \"Hi\"", "  return 0;", "}"],bad:2,why:"End the statement with a semicolon."}},
+{t:"🐛 Bug Hunt 2",bug:{lines:["std::vector<int> v = {1, 2, 3};", "v.push_back(4);", "std::cout << v.size;"],bad:2,why:"size is a function, so write v.size()."}},
+{t:"🐛 Bug Hunt 3",bug:{lines:["int x = 10;", "if (x = 5) {", "  std::cout << \"five\";", "}"],bad:1,why:"= assigns a value. Use == to compare."}}]},
+{id:"rust",name:"Rust",tag:"Safe, fast systems",cmd:"rustc main.rs && ./main",L:[
+{t:"Immutable by default",b:"Rust variables can't change unless marked <code>mut</code>. The compiler checks memory safety for you.",c:"fn main() {\n    let x = 5;\n    let mut y = 10;\n    y += x;\n    println!(\"{}\", y);\n}",q:["How do you make a variable changeable?",["var","mut","change"],1]},
+{t:"🐛 Bug Hunt 1",bug:{lines:["fn main() {", "    let x = 5;", "    x = 6;", "    println!(\"{}\", x);", "}"],bad:2,why:"x isn't mutable. Declare it with let mut x."}},
+{t:"🐛 Bug Hunt 2",bug:{lines:["fn main() {", "    let name = \"Ada\";", "    println(\"{}\", name);", "}"],bad:2,why:"It needs the exclamation mark: println!"}},
+{t:"🐛 Bug Hunt 3",bug:{lines:["fn add(a: i32, b: i32) -> i32 {", "    a + b;", "}"],bad:1,why:"The semicolon throws the value away. Remove it so the function returns a + b."}}]},
+{id:"go",name:"Go",tag:"Servers & cloud tools",cmd:"go run main.go",L:[
+{t:"Packages & functions",b:"Go is small and strict. Every file declares a package; programs start in <code>main</code>.",c:"package main\n\nimport \"fmt\"\n\nfunc add(a, b int) int {\n\treturn a + b\n}\n\nfunc main() {\n\tfmt.Println(add(2, 3))\n}",q:["Which package prints to the console?",["fmt","io","os.print"],0]},
+{t:"🐛 Bug Hunt 1",bug:{lines:["package main", "import \"fmt\"", "func main() {", "  fmt.println(\"Hi\")", "}"],bad:3,why:"Printing functions start with a capital P: fmt.Println."}},
+{t:"🐛 Bug Hunt 2",bug:{lines:["func add(a int, b int) int {", "  return a + b", "}", "x := add(2, 3)", "fmt.Println(y)"],bad:4,why:"y was never created. Print x instead."}},
+{t:"🐛 Bug Hunt 3",bug:{lines:["x := 5", "x := 6", "fmt.Println(x)"],bad:1,why:":= makes a new variable. Use x = 6 to change it."}}]},
+{id:"sh",name:"Bash",tag:"Command line",cmd:"bash lesson.sh",L:[
+{t:"Files & pipes",b:"Pipes (<code>|</code>) send one command's output into the next, so small tools combine into powerful ones.",c:"mkdir demo && cd demo\necho \"b\\na\\nc\" > list.txt\nsort list.txt | head -n 2",q:["What does <code>|</code> do?",["Starts a comment","Sends output into the next command","Deletes a file"],1]},
+{t:"🐛 Bug Hunt 1",bug:{lines:["mkdir demo", "cd demo", "echo hi > a.txt", "cat a.tx"],bad:3,why:"Typo: the file is called a.txt."}},
+{t:"🐛 Bug Hunt 2",bug:{lines:["name=\"Ada\"", "echo Hello $nam"],bad:1,why:"The variable is name, so use $name."}},
+{t:"🐛 Bug Hunt 3",bug:{lines:["for f in *.txt; do", "  echo $f", "done", "fi"],bad:3,why:"fi closes an if, not a for loop. done already closed it."}}]},
+{id:"gloss",name:"📖 Glossary",tag:"Look up any code word",gloss:1,L:[{t:"Glossary"}]}
+];
+let S={};try{S=JSON.parse(localStorage.getItem("cb")||"{}")}catch(e){}
+const save=()=>{try{localStorage.setItem("cb",JSON.stringify(S))}catch(e){}};
+let ti=0,li=0;
+const $=id=>document.getElementById(id);
+const done=(t,i)=>S[t.id+i];
+const TITLES=["Curious Newbie","Code Explorer","Bug Hunter","Script Wizard","Code Ninja","Legend"];
+const PEP=["Almost! Peek at the lesson and try again.","So close. You've got this!","Not yet. Every bug hunter misses at first."];
+const W={};
+const TRY={js0:"Change \"Ada\" to your own name, then press Run.",js1:"Change the numbers, then Run. Can you triple them instead of doubling?",web0:"Add a new &lt;li&gt; with your favorite food, then press Run.",web1:"Change the heading color to hotpink and press Run.",py0:"Change the name and age. Copy it and run it on your PC.",py1:"Add 5 to the list. What would it print?",sql0:"Change 30 to 25. Which names would you get now?",sql1:"Say out loud what this question asks the database.",java0:"Change lang to your favorite language.",cpp0:"Add another number to the list with push_back.",rust0:"Predict what prints if x were 20.",go0:"Change add(2, 3) to add(10, 5).",sh0:"Add a fourth letter to the list before it sorts."};
+const lvl=()=>Math.floor((S.xp||0)/30)+1;
+const THEMES=[["auto","🌗","Auto (follows your computer)"],["pastel","🌸","Pastel light"],["midnight","🌙","Midnight dark"],["sunset","🌇","Sunset light"],["ocean","🌊","Ocean dark"]];
+function applyTheme(){const t=S.theme||"auto",r=document.documentElement;if(t==="auto")r.removeAttribute("data-theme");else r.setAttribute("data-theme",t);$("themes").innerHTML=THEMES.map(x=>`<button class="th ${x[0]===t?"on":""}" data-th="${x[0]}" title="${x[2]}" aria-label="${x[2]}" aria-pressed="${x[0]===t}">${x[1]}</button>`).join("")}
+const TIPS=["Mistakes are how coders learn. Every bug teaches you something.","Read the error message. It usually tells you which line is wrong.","Type the code yourself instead of copying. It sticks better.","Stuck? Take a short break. Your brain keeps working.","Run your code after every few lines. Small steps win.","Name things clearly: score is better than x.","Searching for answers is normal. Every coder does it."];
+const BAD=[["🌱","First lesson",()=>Object.keys(S).some(k=>/^(?!game)[a-z]+\d+$/.test(k))],["🏆","Passed a challenge",()=>Object.keys(S).some(k=>/\dc$/.test(k))],["🤖","First robot level",()=>Object.keys(S).some(k=>/^game\d+$/.test(k))],["👑","Beat the Final Boss",()=>!!S.game9],["🔥","3-day streak",()=>(S.streak||0)>=3],["⭐","Reached level 3",()=>lvl()>=3],["🎓","Finished the JavaScript path",()=>[0,1,2,3,4,5,6,7,8,9].every(i=>S["start"+i])]];
+const beep=(f,d=.12)=>{if(S.mute)return;try{const a=beep.c||(beep.c=new AudioContext()),o=a.createOscillator(),g=a.createGain();o.frequency.value=f;g.gain.value=.05;o.connect(g);g.connect(a.destination);o.start();o.stop(a.currentTime+d)}catch(e){}};
+const kd=f=>e=>{if(e.key==="Tab"){e.preventDefault();const a=e.target;a.setRangeText("  ",a.selectionStart,a.selectionEnd,"end")}if((e.ctrlKey||e.metaKey)&&e.key==="Enter"){const b=f();if(b)b.click()}};
+const SOL={start0:"console.log('Hello, World!');",start1:"let score = 10;\nconsole.log(score);",start2:"console.log(6 * 7);",start3:"const name = 'Ada';\nconsole.log('Hi ' + name);",start4:"const age = 10;\nif (age >= 18) {\n  console.log('Adult');\n} else {\n  console.log('Kid');\n}",start5:"for (let i = 1; i <= 5; i++) {\n  console.log(i);\n}",start6:"function double(n) {\n  return n * 2;\n}\nconsole.log(double(21));",start7:"const fruits = ['apple', 'banana'];\nfruits.push('mango');\nfruits.push('kiwi');\nconsole.log(fruits.length);",start8:"const n = 5;\nfor (let i = 1; i <= 3; i++) {\n  console.log(n + ' x ' + i + ' = ' + n * i);\n}",start9:"for (let i = 1; i <= 5; i++) {\n  if (i % 3 === 0) {\n    console.log('Fizz');\n  } else if (i % 5 === 0) {\n    console.log('Buzz');\n  } else {\n    console.log(i);\n  }\n}"};
+function stats(){const x=S.xp||0,n=T.reduce((a,t)=>t.gloss?a:a+t.L.filter((_,j)=>done(t,j)).length,0),N=T.reduce((a,t)=>t.gloss?a:a+t.L.length,0);
+  $("stats").innerHTML=`<b>Level ${lvl()}: ${TITLES[Math.min(lvl()-1,5)]}</b><div class="xpbar"><i style="width:${(x%30)/30*100}%"></i></div>${x} XP &nbsp; 🔥 ${S.streak||0}-day streak<br>✅ ${n}/${N} lessons<div class="badges">${BAD.map(b=>`<span title="${b[1]}" style="opacity:${b[2]()?1:.25}">${b[0]}</span>`).join(" ")}</div><div class="hint" style="margin-top:6px">💡 ${TIPS[new Date().getDate()%TIPS.length]}</div>`;
+  const m=$("mt");if(m)m.textContent=S.mute?"🔇 Sound off":"🔊 Sound on";const a=$("au");if(a)a.textContent="⏩ Auto-next: "+AUTO[S.auto||"normal"][2]}
+function glossary(){
+  $("main").innerHTML=`<div class="panel"><h2>📖 Glossary</h2><p>Every code word in CodeBench, explained simply. Type to search.</p><input id="gq" class="gq" placeholder="Search: loop, print, SELECT..." aria-label="Search glossary"><div id="gl"></div></div>`;
+  $("main").classList.remove("in");void $("main").offsetWidth;$("main").classList.add("in");
+  const show=q=>{q=q.toLowerCase();const k=Object.keys(G).filter(w=>(w+" "+G[w]).toLowerCase().includes(q));$("gl").innerHTML=k.length?k.map(w=>"<p><code>"+esc(w)+"</code> "+esc(G[w])+"</p>").join(""):'<p class="hint">Nothing found. Try another word.</p>'};
+  $("gq").oninput=e=>show(e.target.value);show("");
+}
+function pop(m){beep(784);setTimeout(()=>beep(1047),130);const d=document.createElement("div");d.className="pop";d.setAttribute("role","status");d.textContent=m;document.body.append(d);setTimeout(()=>d.remove(),2000)}
+function confetti(){if(matchMedia("(prefers-reduced-motion:reduce)").matches)return;for(let i=0;i<45;i++){const c=document.createElement("i");c.className="cf";c.style.left=Math.random()*100+"vw";c.style.background=["#ffd84d","#2f5bea","#ff6b9a","#3ecf8e"][i%4];c.style.animationDelay=Math.random()*.5+"s";document.body.append(c);setTimeout(()=>c.remove(),2600)}}
+const G={"const":"Makes a name for a value that will never change.","let":"Makes a name for a value you can change later.","function":"A reusable recipe: give it a name, run it any time.","func":"Go's word for a function, a reusable recipe.","fn":"Rust's word for a function, a reusable recipe.","return":"Hands the answer back to whoever called the function.","console.log":"Prints a message so you can see it in the output.","map":"Goes through a list and builds a new one by changing every item.","=>":"Arrow: a short way to write a tiny function.","for":"A loop: repeats the steps once for each item.","of":"Reads as 'each item of the list'.","in":"Reads as 'each item in the list'.","if":"Only runs the steps when the condition is true.","print":"Shows text or values on the screen.","SELECT":"Chooses which columns you want back.","FROM":"Says which table to look in.","WHERE":"Keeps only the rows that match a rule.","CREATE TABLE":"Makes a new table, like a blank spreadsheet.","INSERT INTO":"Adds new rows to a table.","VALUES":"The actual data going into the new row.","JOIN":"Combines two tables using a shared column.","ON":"Says which columns must match when joining.","GROUP BY":"Bundles rows together so you can summarize them.","COUNT":"Counts how many rows are in each group.","AS":"Gives a column a friendlier nickname.","public":"Anyone can use this part of the code.","class":"Java: a blueprint that holds your code. HTML: a label you give elements so CSS can style them.","static":"Belongs to the class itself, so it runs without making an object first.","void":"This method gives nothing back.","main":"The starting point: the program begins running here.","String":"A type for text.","int":"A type for whole numbers.","System.out.println":"Prints a line of text in Java.","#include":"Brings in a ready-made toolbox of code.","std::vector":"A list that can grow and shrink.","std::cout":"Sends text to the screen in C++.","push_back":"Adds an item to the end of the list.","let mut":"Makes a name for a value that is allowed to change.","println!":"Prints a line of text in Rust.","+=":"Adds to the value and saves the result.","package":"Names the group this file belongs to.","import":"Brings in a ready-made tool to use.","fmt.Println":"Prints a line of text in Go.","mkdir":"Makes a new folder.","cd":"Moves you into a folder.","echo":"Prints text, or writes it into a file.","sort":"Puts lines in order.","head":"Shows only the first few lines.","|":"Pipe: sends one command's output into the next command.","&&":"Run the next command only if this one worked.","<h1>":"The biggest heading on the page.","<p>":"A paragraph of text.","<ul>":"A bullet list.","<li>":"One item inside a list.","<style>":"Where you write CSS to decorate the page.","<div":"A box that groups other things together.","color":"Sets the text color.","padding":"Empty space inside a box, around its content.","border":"A line drawn around a box.","border-radius":"Rounds the corners."};
+const esc=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+const RE=new RegExp(Object.keys(G).sort((a,b)=>b.length-a.length).map(k=>(/^\w/.test(k)?"\\b":"")+k.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+(/\w$/.test(k)?"\\b":"")).join("|"),"g");
+function tapHTML(c){let o="",p=0;c.replace(RE,(m,i)=>{o+=esc(c.slice(p,i))+'<button class="tk" data-w="'+esc(m).replace(/"/g,"&quot;")+'">'+esc(m)+'</button>';p=i+m.length;return m});return o+esc(c.slice(p))}
+function explain(w){const e=$("exp"),b=document.createElement("b");b.textContent=w;e.textContent="";e.append("👉 ",b,": "+G[w])}
+const exec=code=>{const A=[],P=c=>{if(A.length>=300)throw new Error("Too many steps");A.push(c)};try{new Function("right","left","up","down","wait",code)(()=>P("R"),()=>P("L"),()=>P("U"),()=>P("D"),()=>P("W"));return{a:A}}catch(x){return{err:String(x)}}};
+const WSRC="const exec="+exec+";onmessage=e=>postMessage(exec(e.data))";
+let gid=0;
+function game(t,l){
+  gid++;
+  $("main").innerHTML=`<div class="tabs">${t.L.map((x,j)=>`<button class="tab ${j==li?"on":""} ${done(t,j)?"done":""}" data-j="${j}">${x.t}</button>`).join("")}</div>
+  <div class="panel"><h2>${l.t}</h2><p>${l.b}</p><p class="hint">Commands: <code>right()</code> <code>left()</code> <code>up()</code> <code>down()</code> <code>wait()</code>. Loops and ifs work too! 🪙 Coins give bonus XP. 👾 Guards patrol and move one step every time you do. Don't touch them!</p></div>
+  <div class="panel"><div id="board"></div><textarea id="ed" spellcheck="false" aria-label="Robot code" placeholder="// Type your commands here, e.g. right();"></textarea>
+  <div class="row"><button class="run" id="go">▶ Run my code</button><button class="main" id="rs" style="background:var(--mute)">Reset</button><b id="gs" aria-live="polite"></b></div></div>
+  ${nextHTML()}`;
+  $("main").classList.remove("in");void $("main").offsetWidth;$("main").classList.add("in");
+  const g=l.g.map(r=>r.split("")),msg=m=>{$("gs").textContent=m},E0=[];let pos=[0,0],got=new Set(),E=[],total=0;
+  g.forEach((r,y)=>r.forEach((c,x)=>{if(c==="S")pos=[y,x];if(c==="E"){E0.push({y,x,d:1});g[y][x]="."}if(c==="c")total++}));
+  const start=pos.slice(),reset=()=>{pos=start.slice();got=new Set();E=E0.map(e=>({...e}))};reset();
+  const draw=()=>{$("board").innerHTML=g.map((r,y)=>r.map((c,x)=>{let s="";if(y===pos[0]&&x===pos[1])s="🤖";else if(E.some(e=>e.y===y&&e.x===x))s="👾";else if(c==="#")s="🧱";else if(c==="*")s="⭐";else if(c==="c"&&!got.has(y+","+x))s="🪙";return `<div class="gc ${c==="#"?"wl":""}">${s}</div>`}).join("")).join("")};
+  draw();
+  const win=()=>{msg("🎉 Level complete!"+(total?" 🪙 "+got.size+"/"+total:""));const k="game"+li,gx=25+5*got.size;if(!S[k]){const b=lvl();S[k]=1;S.xp=(S.xp||0)+gx;save();side();confetti();pop(lvl()>b?"⭐ Level up! "+TITLES[Math.min(lvl()-1,5)]:"🎮 Level cleared! +"+gx+" XP");advance()}else confetti();const tb=document.querySelector(".tab.on");if(tb)tb.classList.add("done")};
+  const hit=(a,b)=>E.some(e=>e.y===a&&e.x===b);
+  const play=(a,id)=>{let i=0;const D={R:[0,1],L:[0,-1],U:[-1,0],D:[1,0],W:[0,0]};
+    const step=()=>{if(id!==gid||!$("board"))return;
+      if(i>=a.length){msg("🤔 The robot stopped before the star. Add more steps!");return}
+      const d=D[a[i++]],n=[pos[0]+d[0],pos[1]+d[1]],c=g[n[0]]&&g[n[0]][n[1]],old=pos;
+      if(c===undefined||c==="#"){msg("💥 Bump! The robot hit a wall. Press Reset and try again.");return}
+      pos=n;
+      const caught=()=>{draw();msg("👾 Caught! A guard got you. Press Reset and try again.")};
+      if(hit(n[0],n[1])){caught();return}
+      if(c==="c"&&!got.has(n[0]+","+n[1])){got.add(n[0]+","+n[1])}
+      const was=E.map(e=>[e.y,e.x]);
+      E.forEach(e=>{let nx=e.x+e.d;if(nx<0||nx>=g[0].length||g[e.y][nx]==="#"){e.d=-e.d;nx=e.x+e.d;if(nx<0||nx>=g[0].length||g[e.y][nx]==="#")nx=e.x}e.x=nx});
+      if(hit(n[0],n[1])||E.some((e,k)=>e.y===old[0]&&e.x===old[1]&&was[k][0]===n[0]&&was[k][1]===n[1])){caught();return}
+      draw();if(c==="*"){win();return}
+      setTimeout(step,220)};
+    step()};
+  $("rs").onclick=()=>{gid++;reset();draw();msg("")};
+  $("ed").value=S["c_game"+li]||"";$("ed").addEventListener("keydown",kd(()=>$("go")));$("ed").addEventListener("input",()=>{S["c_game"+li]=$("ed").value;save()});
+  $("go").onclick=()=>{const id=++gid;reset();draw();msg("Running...");
+    const fin=r=>{if(id!==gid)return;if(r.err)msg("😵 "+r.err);else play(r.a,id)};
+    try{const w=new Worker(URL.createObjectURL(new Blob([WSRC])));
+      const k=setTimeout(()=>{w.terminate();fin({err:"Your code took too long. Is there an endless loop?"})},1500);
+      w.onmessage=e=>{clearTimeout(k);w.terminate();fin(e.data)};
+      w.onerror=()=>{clearTimeout(k);w.terminate();fin(exec($("ed").value))};
+      w.postMessage($("ed").value)}catch(e){fin(exec($("ed").value))}};
+}
+const complete=()=>{const t=T[ti],l=t.L[li];return !!S[t.id+li]&&(!l.ch||!!S[t.id+li+"c"])};
+function nextUp(){const t=T[ti];if(li+1<t.L.length)return[ti,li+1];for(let i=ti+1;i<T.length;i++)if(!T[i].gloss)return[i,0];return null}
+const AUTO={off:[0,0,"Off"],fast:[600,500,"Fast"],normal:[1800,1200,"Normal"],slow:[3500,1500,"Slow"]};
+const go=n=>{ti=n[0];li=n[1];side();lesson();window.scrollTo({top:0,behavior:"smooth"})};
+const nextHTML=()=>{const n=nextUp();return n?`<div class="row" style="justify-content:flex-end"><button class="main" data-nx="1">Next: ${esc(T[n[0]].L[n[1]].t)} →</button></div>`:""};
+function advance(){const m=AUTO[S.auto||"normal"];if(!m[0])return;const f=[ti,li],n=nextUp();
+  setTimeout(()=>{if(ti!==f[0]||li!==f[1])return;
+    if(!n){pop("🏁 You finished every lesson!");return}
+    pop("➡️ Next: "+T[n[0]].L[n[1]].t);
+    setTimeout(()=>{if(ti!==f[0]||li!==f[1])return;go(n)},m[1])},m[0])}
+function questMap(){
+  const all=[];T.forEach((t,i)=>{if(!t.gloss)t.L.forEach((l,j)=>all.push([i,j]))});
+  const nxt=all.find(([i,j])=>!done(T[i],j)),nd=all.filter(([i,j])=>done(T[i],j)).length;
+  $("main").innerHTML=`<div class="panel mascot"><div class="bit" aria-hidden="true">🦊</div><div><h2>Hi, I'm Bit!</h2><p>${nxt?"Your next quest is <b>"+esc(T[nxt[0]].L[nxt[1]].t)+"</b> in "+esc(T[nxt[0]].name)+". Ready?":"You cleared every quest. You're a legend! 🏆"}</p>${nxt?'<button class="main" data-go="'+nxt+'">▶ Start next quest</button>':""}</div></div>
+  <div class="panel"><b>${nd}/${all.length} quests cleared</b><div class="bar"><i style="width:${nd/all.length*100}%"></i></div></div>
+  ${T.map((t,i)=>t.gloss?"":`<div class="panel"><h3>${t.name} <span class="hint">${t.tag}</span></h3><div class="path">${t.L.map((l,j)=>{const d=done(t,j),c=nxt&&nxt[0]===i&&nxt[1]===j;return `<button class="node ${d?"dn":""} ${c?"cur":""}" data-go="${i},${j}" title="${esc(l.t)}" style="transform:translateY(${[0,8,0,-8][j%4]}px)"><span>${d?"⭐":j+1}</span><small>${esc(l.t.replace(/^\d+\.\s*/,""))}</small></button>`}).join("")}</div></div>`).join("")}`;
+  $("main").classList.remove("in");void $("main").offsetWidth;$("main").classList.add("in");
+}
+let BG={lives:3,over:false};
+function bugGame(t,l){
+  gid++;BG={lives:3,over:false};
+  $("main").innerHTML=`<div class="tabs">${t.L.map((x,j)=>`<button class="tab ${j==li?"on":""} ${done(t,j)?"done":""}" data-j="${j}">${x.t}</button>`).join("")}</div>
+  <div class="panel"><h2>${l.t}</h2><p>One line of this ${esc(t.name)} code has a bug 🐛. Tap the buggy line to squash it. You have 3 lives!</p><p id="bl" aria-live="polite" style="font-size:20px;margin:4px 0">❤️❤️❤️</p>${l.bug.lines.map((x,i)=>`<button class="bline" data-b="${i}">${esc(x)||" "}</button>`).join("")}<p id="bm" class="hint" aria-live="polite" style="margin-top:10px"></p></div>
+  ${nextHTML()}`;
+  $("main").classList.remove("in");void $("main").offsetWidth;$("main").classList.add("in");
+}
+function bugTap(i){const t=T[ti],l=t.L[li];if(BG.over)return;const bs=document.querySelectorAll(".bline"),k=t.id+li;
+  if(i===l.bug.bad){BG.over=true;bs[i].classList.add("good");$("bm").textContent="🎯 Squashed! "+l.bug.why;
+    if(!S[k]){const b=lvl(),g=20+BG.lives*5;S[k]=1;S.xp=(S.xp||0)+g;save();side();confetti();pop(lvl()>b?"⭐ Level up! "+TITLES[Math.min(lvl()-1,5)]:"🐛 Bug squashed! +"+g+" XP");advance()}else confetti();
+    const tb=document.querySelector(".tab.on");if(tb)tb.classList.add("done")}
+  else{BG.lives--;beep(200,.2);bs[i].classList.add("bad");$("bl").textContent="❤️".repeat(BG.lives)+"🖤".repeat(3-BG.lives);
+    if(BG.lives<=0){BG.over=true;bs[l.bug.bad].classList.add("good");$("bm").innerHTML=esc("Out of lives! The bug was the highlighted line. "+l.bug.why)+' <button class="main" data-br="1">Try again</button>'}else $("bm").textContent="Not that one. Try again!"}}
+function side(){stats();$("tracks").innerHTML=T.map((t,i)=>{const n=t.L.filter((_,j)=>done(t,j)).length;return `<button class="track ${i==ti?"on":""}" data-i="${i}">${t.name}<small>${t.tag}</small><div class="bar"><i style="width:${n/t.L.length*100}%"></i></div></button>`}).join("")}
+function lesson(){
+  const t=T[ti],l=t.L[li];
+  if(t.game)return game(t,l);
+  if(t.map)return questMap();
+  if(l.bug)return bugGame(t,l);
+  if(t.gloss)return glossary();
+  $("main").innerHTML=`
+  <div class="tabs">${t.L.map((x,j)=>`<button class="tab ${j==li?"on":""} ${done(t,j)?"done":""}" data-j="${j}">${x.t}</button>`).join("")}</div>
+  <div class="panel"><h2>${l.t}</h2><p>${l.b}</p></div>
+  <div class="mission"><b>🎯 Your mission:</b> ${TRY[t.id+li]||"Change something and see what happens!"}</div>
+  <div class="panel"><h3>👆 Tap any underlined word</h3><pre class="tap">${tapHTML(l.c)}</pre><div class="mission" id="exp" aria-live="polite">Tap a word in the code and I'll explain it in plain English.</div></div>
+  <div class="panel"><h3>Try it</h3>
+    <textarea id="ed" spellcheck="false" aria-label="Code editor"></textarea>
+    <div class="row">${t.run?`<button class="run" id="run">Run</button>`:`<button class="run" id="copy">Copy code</button>`}<button class="main" id="reset" style="background:var(--mute)">Reset</button>
+    ${t.run?"":`<span class="hint">Runs on your PC with: <code>${t.cmd}</code></span>`}</div>
+    <div id="res"></div></div>
+  ${l.ch?`<div class="panel"><h3>🏆 Challenge</h3><p>${l.ch.k}</p><p class="hint" id="chh"></p><div class="row"><button class="main" id="hint">Need a hint?</button>${SOL[t.id+li]?'<button class="main" id="sol" style="background:var(--mute)">Show solution</button>':""}<b id="chs"></b></div><p class="hint">Edit the code above, press Run, and I'll check it for you.</p></div>`:""}
+  <div class="panel"><h3>Check yourself</h3><p>${l.q[0]}</p>
+    ${l.q[1].map((o,k)=>`<button class="opt" data-k="${k}"></button>`).join("")}<p id="fb" class="hint"></p></div>
+  ${nextHTML()}`;
+  $("ed").value=S["c_"+t.id+li]??l.c;
+  $("main").classList.remove("in");void $("main").offsetWidth;$("main").classList.add("in");
+  document.querySelectorAll(".opt").forEach((b,k)=>b.textContent=l.q[1][k].replace(/<\/?code>/g,""));
+  $("ed").addEventListener("keydown",kd(()=>$("run")||$("copy")));
+  $("ed").addEventListener("input",()=>{S["c_"+t.id+li]=$("ed").value;save()});
+  $("reset").onclick=()=>{$("ed").value=l.c;delete S["c_"+t.id+li];save()};
+  if(l.ch)$("hint").onclick=()=>{$("chh").textContent="💡 "+l.ch.h};
+  if($("sol"))$("sol").onclick=()=>{$("ed").value=SOL[t.id+li]};
+  if(t.run)$("run").onclick=run;else $("copy").onclick=async()=>{try{await navigator.clipboard.writeText($("ed").value);$("copy").textContent="Copied"}catch(e){$("ed").select()}};
+}
+function run(){
+  const t=T[ti],code=$("ed").value,res=$("res");
+  if(t.run==="html"){res.innerHTML='<iframe sandbox title="Preview"></iframe>';res.firstChild.srcdoc=code;return}
+  res.innerHTML='<pre class="out" id="o"></pre><iframe sandbox="allow-scripts" hidden></iframe>';
+  const o=$("o");o.textContent="";
+  const f=res.querySelector("iframe");
+  const c=t.L[li].ch,key=t.id+li+"c";
+  function win(){const s=$("chs");if(!s)return;s.textContent="✅ Challenge passed!";if(!S[key]){const b=lvl(),wasC=complete();S[key]=1;S.xp=(S.xp||0)+20;save();side();confetti();if(!wasC&&complete())advance();pop(lvl()>b?"⭐ Level up! "+TITLES[Math.min(lvl()-1,5)]:"🏆 Challenge! +20 XP")}}
+  window.onmessage=e=>{if(e.source!==f.contentWindow)return;o.textContent+=e.data+"\n";if(c&&o.textContent.trim()===c.e)win()};
+  f.srcdoc='<script>const P=m=>parent.postMessage(m,"*");const F=a=>a.map(x=>typeof x==="object"?JSON.stringify(x):String(x)).join(" ");console.log=(...a)=>P(F(a));window.onerror=m=>P("Error: "+m);<\/script><script>'+code.replace(/<\/script/gi,"<\\/script")+'<\/script>';
+}
+document.addEventListener("click",e=>{
+  const a=e.target.closest("[data-i],[data-j],[data-k],[data-w],[data-th],[data-nx],[data-go],[data-b],[data-br]");if(!a)return;
+  if(a.dataset.go!==undefined){go(a.dataset.go.split(",").map(Number));return}
+  if(a.dataset.br!==undefined){bugGame(T[ti],T[ti].L[li]);return}
+  if(a.dataset.b!==undefined){bugTap(+a.dataset.b);return}
+  if(a.dataset.nx!==undefined){const n=nextUp();if(n)go(n);return}
+  if(a.dataset.th!==undefined){S.theme=a.dataset.th;save();applyTheme();return}
+  if(a.dataset.w!==undefined){explain(a.dataset.w);document.querySelectorAll(".tk.sel").forEach(x=>x.classList.remove("sel"));a.classList.add("sel");return}
+  if(a.dataset.i!==undefined){ti=+a.dataset.i;li=0;side();lesson()}
+  else if(a.dataset.j!==undefined){li=+a.dataset.j;lesson()}
+  else{const l=T[ti].L[li],k=+a.dataset.k,ok=k===l.q[2];
+    document.querySelectorAll(".opt").forEach((b,i)=>{b.classList.toggle("right",i===l.q[2]&&ok);b.classList.toggle("wrong",i===k&&!ok)});
+    const key=T[ti].id+li;
+    if(!ok){beep(200,.2);W[key]=(W[key]||0)+1;$("fb").textContent=PEP[W[key]%PEP.length]}
+    else{const first=!S[key],before=lvl(),wasC=complete();let g=0;
+      if(first){g=W[key]?5:15;S.xp=(S.xp||0)+g;S[key]=1;const d=new Date().toDateString(),y=new Date(Date.now()-864e5).toDateString();S.streak=S.last===d?(S.streak||1):S.last===y?(S.streak||0)+1:1;S.last=d;save()}
+      $("fb").textContent=first?"Nailed it! +"+g+" XP":"Correct again. Nice memory!";
+      side();document.querySelector(".tab.on").classList.add("done");if(!wasC&&complete())advance();
+      if(first){confetti();pop(lvl()>before?"⭐ Level up! "+TITLES[Math.min(lvl()-1,5)]:"🎉 +"+g+" XP")}}}
+});
+applyTheme();
+$("rp").onclick=()=>{if(confirm("Erase all XP, streak and progress?")){S={};save();side();lesson()}};
+$("au").onclick=()=>{const k=Object.keys(AUTO),i=k.indexOf(S.auto||"normal");S.auto=k[(i+1)%k.length];save();stats()};
+$("mt").onclick=()=>{S.mute=!S.mute;save();stats()};
+side();lesson();
+</script>
+</body>
+</html>
